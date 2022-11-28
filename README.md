@@ -38,3 +38,14 @@
 <p>
 
 ##
+
+```neon
+extensions:
+	orisai.http.auth: OriNette\Http\Auth\DI\HttpAuthExtension
+
+orisai.http.auth:
+	enabled: true
+	users:
+		user1: password
+		user2: $2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a
+```
