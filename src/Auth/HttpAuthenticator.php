@@ -32,7 +32,8 @@ final class HttpAuthenticator
 
 	private ?string $title;
 
-	private ?string $errorResponse;
+	/** @var non-empty-list<string>|null */
+	private ?array $errorResponses;
 
 	/** @var array<string, string> */
 	private array $users = [];
@@ -40,10 +41,13 @@ final class HttpAuthenticator
 	/** @var array<string> */
 	private array $excludedPaths = [];
 
-	public function __construct(?string $title = null, ?string $errorResponse = null)
+	/**
+	 * @param non-empty-list<string>|null $errorResponses
+	 */
+	public function __construct(?string $title = null, ?array $errorResponses = null)
 	{
 		$this->title = $title;
-		$this->errorResponse = $errorResponse;
+		$this->errorResponses = $errorResponses;
 	}
 
 	public function addUser(string $user, string $password): void
@@ -125,7 +129,9 @@ final class HttpAuthenticator
 		$response->setCode(IResponse::S401_UNAUTHORIZED);
 		$response->setHeader('WWW-Authenticate', "Basic realm=\"$title\"");
 
-		echo $this->errorResponse ?? self::DefaultErrorResponses[array_rand(self::DefaultErrorResponses)];
+		$responses = $this->errorResponses ?? self::DefaultErrorResponses;
+
+		echo $responses[array_rand($responses)];
 
 		exit;
 	}

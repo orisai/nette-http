@@ -52,10 +52,11 @@ orisai.http.auth:
 			- /api
 ```
 
-[Optional] Change title and error response from default ones (if you don't like Lord Of The Rings)
+[Optional] Change title and possible (random) error responses from default ones (if you don't like Lord Of The Rings)
 
 ```neon
 orisai.http.auth:
 	title: HTTP authentication
-	errorResponse: Not allowed
+	errorResponses:
+		- Not allowed
 ```

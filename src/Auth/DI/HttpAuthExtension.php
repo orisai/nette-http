@@ -21,7 +21,10 @@ final class HttpAuthExtension extends CompilerExtension
 		return Expect::structure([
 			'enabled' => Expect::bool(false),
 			'title' => Expect::anyOf(Expect::string(), Expect::null()),
-			'errorResponse' => Expect::anyOf(Expect::string(), Expect::null()),
+			'errorResponses' => Expect::anyOf(
+				Expect::listOf(Expect::string())->min(1),
+				Expect::null(),
+			),
 			'users' => Expect::arrayOf(Expect::string(), Expect::string()),
 			'exclude' => Expect::structure([
 				'paths' => Expect::listOf(Expect::string()),
@@ -43,7 +46,7 @@ final class HttpAuthExtension extends CompilerExtension
 		$authenticatorDefinition = $builder->addDefinition($this->prefix('authenticator'))
 			->setFactory(HttpAuthenticator::class, [
 				$config->title,
-				$config->errorResponse,
+				$config->errorResponses,
 			]);
 
 		foreach ($config->users as $user => $password) {
