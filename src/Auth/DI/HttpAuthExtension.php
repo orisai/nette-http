@@ -24,7 +24,7 @@ final class HttpAuthExtension extends CompilerExtension
 			'errorResponse' => Expect::anyOf(Expect::string(), Expect::null()),
 			'users' => Expect::arrayOf(Expect::string(), Expect::string()),
 			'exclude' => Expect::structure([
-				'paths' => Expect::arrayOf(Expect::string()),
+				'paths' => Expect::listOf(Expect::string()),
 			]),
 		]);
 	}
