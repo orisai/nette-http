@@ -10,6 +10,7 @@ use function assert;
 use function class_exists;
 use function hash_equals;
 use function implode;
+use function method_exists;
 use function password_verify;
 use function preg_match;
 use function preg_split;
@@ -61,8 +62,7 @@ final class HttpAuthenticator
 			return;
 		}
 
-		$url = $request->getUrl();
-		if ($this->isUserAllowed($url->getUser(), $url->getPassword())) {
+		if ($this->isUserAllowed($request)) {
 			return;
 		}
 
@@ -89,8 +89,16 @@ final class HttpAuthenticator
 		return false;
 	}
 
-	private function isUserAllowed(string $user, string $password): bool
+	private function isUserAllowed(IRequest $request): bool
 	{
+		if (method_exists($request, 'getBasicCredentials')) {
+			[$user, $password] = $request->getBasicCredentials();
+		} else {
+			$url = $request->getUrl();
+			$user = $url->getUser();
+			$password = $url->getPassword();
+		}
+
 		$expectedPassword = $this->users[$user] ?? null;
 		if ($expectedPassword === null) {
 			return false;
