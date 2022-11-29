@@ -4,16 +4,15 @@ namespace Tests\OriNette\Http\Unit\Auth;
 
 use Generator;
 use Nette\Http\Request;
-use Nette\Http\Response;
 use Nette\Http\UrlScript;
 use Nette\Utils\Helpers;
 use OriNette\Http\Auth\HttpAuthenticator;
+use OriNette\Http\Tester\TestResponse;
 use PHPUnit\Framework\TestCase;
 use Tracy\Debugger;
 
 /**
  * @runTestsInSeparateProcesses
- * @todo - should use test request/response
  */
 final class HttpAuthenticatorTest extends TestCase
 {
@@ -24,7 +23,7 @@ final class HttpAuthenticatorTest extends TestCase
 	public function testAllowed(string $user, string $password, string $passwordHash): void
 	{
 		$request = new Request(new UrlScript("https://$user:$password@example.com"));
-		$response = new Response();
+		$response = new TestResponse();
 
 		$authenticator = new HttpAuthenticator();
 		$authenticator->addUser($user, $passwordHash);
@@ -45,17 +44,23 @@ final class HttpAuthenticatorTest extends TestCase
 	public function testNotAllowed(?string $user, string $userExpected, ?string $password, string $passwordHash): void
 	{
 		$request = new Request(new UrlScript("https://$user:$password@example.com"));
-		$response = new Response();
+		$response = new TestResponse();
 
 		$authenticator = new HttpAuthenticator();
 		$authenticator->setTestMode();
 		$authenticator->addUser($userExpected, $passwordHash);
 
-		$response = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
 
-		// TODO - test headers with test response
-
-		self::assertContains($response, HttpAuthenticator::DefaultErrorResponses);
+		self::assertSame(
+			[
+				'WWW-Authenticate' => [
+					'Basic realm="Speak friend and enter."',
+				],
+			],
+			$response->getHeaders(),
+		);
+		self::assertContains($echoed, HttpAuthenticator::DefaultErrorResponses);
 	}
 
 	public function provideNotAllowed(): Generator
@@ -76,7 +81,7 @@ final class HttpAuthenticatorTest extends TestCase
 	{
 		//TODO - test base path - currently disabled in HttpAuthenticator - seems like Nette does not like / on the end
 		$request = new Request(new UrlScript("https://example.com/$currentPath"));
-		$response = new Response();
+		$response = new TestResponse();
 
 		$authenticator = new HttpAuthenticator();
 		$authenticator->addExcludedPath('a');
@@ -116,12 +121,12 @@ final class HttpAuthenticatorTest extends TestCase
 		Debugger::$productionMode = false;
 
 		$request = new Request(new UrlScript('https://user:password@example.com'));
-		$response = new Response();
+		$response = new TestResponse();
 		$authenticator->authenticate($request, $response);
 		self::assertFalse(Debugger::$productionMode);
 
 		$request = new Request(new UrlScript('https://example.com'));
-		$response = new Response();
+		$response = new TestResponse();
 		Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
 		self::assertTrue(Debugger::$productionMode);
 	}
@@ -135,13 +140,19 @@ final class HttpAuthenticatorTest extends TestCase
 		$authenticator->setTestMode();
 
 		$request = new Request(new UrlScript('https://example.com'));
-		$response = new Response();
+		$response = new TestResponse();
 
-		$response = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
 
-		// TODO - test headers with test response
-
-		self::assertContains($response, $errorResponses);
+		self::assertSame(
+			[
+				'WWW-Authenticate' => [
+					'Basic realm="title"',
+				],
+			],
+			$response->getHeaders(),
+		);
+		self::assertContains($echoed, $errorResponses);
 	}
 
 }

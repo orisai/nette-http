@@ -6,6 +6,7 @@ Extras for [nette/http](https://github.com/nette/http)
 
 - [Setup](#setup)
 - [HTTP authenticator](#http-authenticator)
+- [Test response](#test-response)
 
 ## Setup
 
@@ -68,4 +69,18 @@ orisai.http.auth:
 	title: HTTP authentication
 	errorResponses:
 		- Not allowed
+```
+
+## Test response
+
+Implementation of `Nette\Http\IResponse` which does not send data immediately and instead keeps them inside value
+object.
+
+Use for testing classes which set data to response. It is currently not integrated with nette/application and should not
+be used for a runtime code.
+
+```php
+use OriNette\Http\Tester\TestResponse;
+
+$response = new TestResponse();
 ```
