@@ -20,6 +20,8 @@ composer require orisai/nette-http
 [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
 via [Basic Auth](https://datatracker.ietf.org/doc/html/rfc7617)
 
+Ideal for hiding publicly available dev version of the app.
+
 Register and enable extension
 
 ```neon
@@ -43,7 +45,8 @@ orisai.http.auth:
 		user2: $2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a
 ```
 
-[Optional] Exclude paths from http authentication
+[Optional] Exclude paths from http authentication (ideal for APIs which don't expect human interaction and would need
+API client to be modified for basic auth support)
 
 ```neon
 orisai.http.auth:
