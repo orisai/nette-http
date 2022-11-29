@@ -9,6 +9,8 @@ orisai.http.auth:
 		user2: $2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a
 
 services:
+	nette.http.response:
+		factory: OriNette\Http\Tester\TestResponse
 	orisai.http.auth.authenticator:
 		setup:
 			- setTestMode()

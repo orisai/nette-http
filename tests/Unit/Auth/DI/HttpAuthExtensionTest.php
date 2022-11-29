@@ -3,6 +3,8 @@
 namespace Tests\OriNette\Http\Unit\Auth\DI;
 
 use Generator;
+use Nette\Http\IRequest;
+use Nette\Http\IResponse;
 use Nette\Utils\Helpers;
 use OriNette\DI\Boot\ManualConfigurator;
 use OriNette\Http\Auth\HttpAuthenticator;
@@ -48,11 +50,26 @@ final class HttpAuthExtensionTest extends TestCase
 
 		$configurator->addConfig(__DIR__ . '/HttpAuthExtension.enabled.neon');
 
-		$response = Helpers::capture(static fn () => $configurator->createContainer());
+		$container = $configurator->createContainer(false);
 
-		// TODO - test headers with test response
+		$authenticator = $container->getService('orisai.http.auth.authenticator');
+		self::assertInstanceOf(HttpAuthenticator::class, $authenticator);
+		self::assertSame($authenticator, $container->getByType(HttpAuthenticator::class));
 
-		self::assertContains($response, HttpAuthenticator::DefaultErrorResponses);
+		$request = $container->getByType(IRequest::class);
+		$response = $container->getByType(IResponse::class);
+
+		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+
+		self::assertSame(
+			[
+				'WWW-Authenticate' => [
+					'Basic realm="Speak friend and enter."',
+				],
+			],
+			$response->getHeaders(),
+		);
+		self::assertContains($echoed, HttpAuthenticator::DefaultErrorResponses);
 	}
 
 	public function testCustomTexts(): void
@@ -63,11 +80,26 @@ final class HttpAuthExtensionTest extends TestCase
 		$configurator->addConfig(__DIR__ . '/HttpAuthExtension.enabled.neon');
 		$configurator->addConfig(__DIR__ . '/HttpAuthExtension.customTexts.neon');
 
-		$response = Helpers::capture(static fn () => $configurator->createContainer());
+		$container = $configurator->createContainer(false);
 
-		// TODO - test headers with test response
+		$authenticator = $container->getService('orisai.http.auth.authenticator');
+		self::assertInstanceOf(HttpAuthenticator::class, $authenticator);
+		self::assertSame($authenticator, $container->getByType(HttpAuthenticator::class));
 
-		self::assertContains($response, ['a', 'b', 'c']);
+		$request = $container->getByType(IRequest::class);
+		$response = $container->getByType(IResponse::class);
+
+		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+
+		self::assertSame(
+			[
+				'WWW-Authenticate' => [
+					'Basic realm="Title"',
+				],
+			],
+			$response->getHeaders(),
+		);
+		self::assertContains($echoed, ['a', 'b', 'c']);
 	}
 
 	public function testExcludedPath(): void
@@ -82,9 +114,8 @@ final class HttpAuthExtensionTest extends TestCase
 
 		$container = $configurator->createContainer();
 
-		$authenticator = $container->getService('orisai.http.auth.authenticator');
+		$authenticator = $container->getByType(HttpAuthenticator::class);
 		self::assertInstanceOf(HttpAuthenticator::class, $authenticator);
-		self::assertSame($authenticator, $container->getByType(HttpAuthenticator::class));
 	}
 
 	/**
@@ -102,9 +133,8 @@ final class HttpAuthExtensionTest extends TestCase
 
 		$container = $configurator->createContainer();
 
-		$authenticator = $container->getService('orisai.http.auth.authenticator');
+		$authenticator = $container->getByType(HttpAuthenticator::class);
 		self::assertInstanceOf(HttpAuthenticator::class, $authenticator);
-		self::assertSame($authenticator, $container->getByType(HttpAuthenticator::class));
 	}
 
 	public function provideVerified(): Generator
@@ -131,11 +161,9 @@ final class HttpAuthExtensionTest extends TestCase
 			$_SERVER['PHP_AUTH_PW'] = $password;
 		}
 
-		$response = Helpers::capture(static fn () => $configurator->createContainer());
+		$echoed = Helpers::capture(static fn () => $configurator->createContainer());
 
-		// TODO - test headers with test response
-
-		self::assertContains($response, HttpAuthenticator::DefaultErrorResponses);
+		self::assertContains($echoed, HttpAuthenticator::DefaultErrorResponses);
 	}
 
 	public function provideNotVerified(): Generator
