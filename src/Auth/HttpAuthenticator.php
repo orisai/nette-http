@@ -4,10 +4,10 @@ namespace OriNette\Http\Auth;
 
 use Nette\Http\IRequest;
 use Nette\Http\IResponse;
+use Orisai\Utils\Dependencies\Dependencies;
 use Tracy\Debugger;
 use function array_rand;
 use function assert;
-use function class_exists;
 use function hash_equals;
 use function implode;
 use function method_exists;
@@ -15,16 +15,14 @@ use function password_verify;
 use function preg_match;
 use function preg_split;
 use function str_starts_with;
-use function strlen;
-use function substr;
 use const PREG_SPLIT_NO_EMPTY;
 
 final class HttpAuthenticator
 {
 
-	private const DefaultTitle = 'Speak friend and enter.';
+	public const DefaultTitle = 'Speak friend and enter.';
 
-	private const DefaultErrorResponses = [
+	public const DefaultErrorResponses = [
 		'You shall not pass!',
 		'You have no authority here! Your orders mean nothing!',
 		'No, thank you! We don’t want any more visitors, well-wishers or distant relations!',
@@ -40,6 +38,8 @@ final class HttpAuthenticator
 
 	/** @var array<string> */
 	private array $excludedPaths = [];
+
+	private bool $testMode = false;
 
 	/**
 	 * @param non-empty-list<string>|null $errorResponses
@@ -60,6 +60,14 @@ final class HttpAuthenticator
 		$this->excludedPaths[] = $path;
 	}
 
+	/**
+	 * @internal
+	 */
+	public function setTestMode(): void
+	{
+		$this->testMode = true;
+	}
+
 	public function authenticate(IRequest $request, IResponse $response): void
 	{
 		if ($this->isPathExcluded($request)) {
@@ -70,7 +78,7 @@ final class HttpAuthenticator
 			return;
 		}
 
-		if (class_exists(Debugger::class)) {
+		if (Dependencies::isPackageLoaded('tracy/tracy')) {
 			Debugger::$productionMode = true;
 		}
 
@@ -81,7 +89,8 @@ final class HttpAuthenticator
 	{
 		$url = $request->getUrl();
 		$relativePath = $this->normalizePath(
-			substr($url->getPath(), strlen($url->getBasePath())),
+			//substr($url->getPath(), strlen($url->getBasePath())),
+			$url->getPath(),
 		);
 
 		foreach ($this->excludedPaths as $excludedPath) {
@@ -120,9 +129,6 @@ final class HttpAuthenticator
 		return hash_equals($expectedPassword, $password);
 	}
 
-	/**
-	 * @return never
-	 */
 	private function forbidden(IResponse $response): void
 	{
 		$title = $this->title ?? self::DefaultTitle;
@@ -133,7 +139,9 @@ final class HttpAuthenticator
 
 		echo $responses[array_rand($responses)];
 
-		exit;
+		if (!$this->testMode) {
+			exit;
+		}
 	}
 
 	private function normalizePath(string $path): string

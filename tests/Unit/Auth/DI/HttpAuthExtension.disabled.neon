@@ -1,0 +1,2 @@
+extensions:
+	orisai.http.auth: OriNette\Http\Auth\DI\HttpAuthExtension

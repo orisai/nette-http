@@ -45,6 +45,12 @@ orisai.http.auth:
 		user2: $2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a
 ```
 
+Integration with debugger
+
+- If user is not authorized, [Tracy](https://github.com/nette/tracy/) is set to production mode, so it does not leak
+  debug info
+- If you use any other debugger, please raise an issue
+
 [Optional] Exclude paths from http authentication (ideal for APIs which don't expect human interaction and would need
 API client to be modified for basic auth support)
 

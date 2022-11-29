@@ -1,0 +1,4 @@
+orisai.http.auth:
+	exclude:
+		paths:
+			- api

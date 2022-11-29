@@ -1,0 +1,6 @@
+orisai.http.auth:
+	title: Title
+	errorResponses:
+		- a
+		- b
+		- c
