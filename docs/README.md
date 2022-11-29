@@ -34,7 +34,7 @@ orisai.http.auth:
 
 Add list of authorized users
 
-- in `username:password` format
+- in `username: password` format
 - both plain passwords and passwords hashed
   via [password_hash](https://www.php.net/manual/en/function.password-hash.php) are accepted
 
