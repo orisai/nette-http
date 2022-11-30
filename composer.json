@@ -2,8 +2,9 @@
 	"name": "orisai/nette-http",
 	"description": "Extras for nette/http",
 	"keywords": [
+		"auth",
 		"authentication",
-		"basic auth",
+		"basic",
 		"http",
 		"nette",
 		"orisai"
