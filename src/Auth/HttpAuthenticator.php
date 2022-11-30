@@ -98,7 +98,8 @@ final class HttpAuthenticator
 		);
 
 		foreach ($this->excludedPaths as $excludedPath) {
-			if (str_starts_with($relativePath, $this->normalizePath($excludedPath))) {
+			$excludedPath = $this->normalizePath($excludedPath);
+			if ($relativePath === $excludedPath || str_starts_with($relativePath, "$excludedPath/")) {
 				return true;
 			}
 		}

@@ -80,7 +80,7 @@ final class HttpAuthenticatorTest extends TestCase
 	public function testExcludedPaths(string $currentPath): void
 	{
 		//TODO - test base path - currently disabled in HttpAuthenticator - seems like Nette does not like / on the end
-		$request = new Request(new UrlScript("https://example.com/$currentPath"));
+		$request = new Request(new UrlScript("https://example.com$currentPath"));
 		$response = new TestResponse();
 
 		$authenticator = new HttpAuthenticator();
@@ -96,20 +96,63 @@ final class HttpAuthenticatorTest extends TestCase
 
 	public function provideExcludedPaths(): Generator
 	{
-		yield ['a'];
-		yield ['a/'];
-		yield ['b'];
-		yield ['b/'];
-		yield ['c'];
-		yield ['c/'];
-		yield ['d'];
-		yield ['d/'];
-		yield ['d/foo'];
-		yield ['d//foo'];
-		yield ['d/foo/'];
-		yield ['d/foo/bar'];
-		yield ['d/foo//bar'];
-		yield ['e/foo'];
+		yield ['/a'];
+		yield ['/a/'];
+		yield ['/b'];
+		yield ['/b/'];
+		yield ['/c'];
+		yield ['/c/'];
+		yield ['/d'];
+		yield ['/d/'];
+		yield ['/d/foo'];
+		yield ['/d//foo'];
+		yield ['/d/foo/'];
+		yield ['/d/foo/bar'];
+		yield ['/d/foo//bar'];
+		yield ['/e/foo'];
+	}
+
+	/**
+	 * @dataProvider provideNotAllowedPaths
+	 */
+	public function testNotAllowedPaths(string $currentPath): void
+	{
+		$request = new Request(new UrlScript("https://example.com$currentPath"));
+		$response = new TestResponse();
+
+		$authenticator = new HttpAuthenticator();
+		$authenticator->setTestMode();
+
+		$authenticator->addExcludedPath('a');
+		$authenticator->addExcludedPath('b/foo');
+
+		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+
+		self::assertSame(
+			[
+				'WWW-Authenticate' => [
+					'Basic realm="Speak friend and enter."',
+				],
+			],
+			$response->getHeaders(),
+		);
+		self::assertContains($echoed, HttpAuthenticator::DefaultErrorResponses);
+	}
+
+	public function provideNotAllowedPaths(): Generator
+	{
+		yield ['/z/a'];
+		yield ['/z/a/'];
+		yield ['/za'];
+		yield ['/za/'];
+		yield ['/az'];
+		yield ['/az/'];
+		yield ['/b'];
+		yield ['/b/'];
+		yield ['/b/baz'];
+		yield ['/b/baz/'];
+		yield ['/c/b/foo'];
+		yield ['/c/b/foo/'];
 	}
 
 	public function testTracy(): void
