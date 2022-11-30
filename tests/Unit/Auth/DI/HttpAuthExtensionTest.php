@@ -94,7 +94,7 @@ final class HttpAuthExtensionTest extends TestCase
 		self::assertSame(
 			[
 				'WWW-Authenticate' => [
-					'Basic realm="Title"',
+					'Basic realm="realm"',
 				],
 			],
 			$response->getHeaders(),

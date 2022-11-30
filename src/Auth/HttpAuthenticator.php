@@ -28,10 +28,10 @@ final class HttpAuthenticator
 		'No, thank you! We don’t want any more visitors, well-wishers or distant relations!',
 	];
 
-	private ?string $title;
+	private ?string $realm = self::DefaultTitle;
 
-	/** @var non-empty-list<string>|null */
-	private ?array $errorResponses;
+	/** @var non-empty-list<string> */
+	private array $errorResponses = self::DefaultErrorResponses;
 
 	/** @var array<string, string> */
 	private array $users = [];
@@ -41,13 +41,17 @@ final class HttpAuthenticator
 
 	private bool $testMode = false;
 
-	/**
-	 * @param non-empty-list<string>|null $errorResponses
-	 */
-	public function __construct(?string $title = null, ?array $errorResponses = null)
+	public function setRealm(?string $realm): void
 	{
-		$this->title = $title;
-		$this->errorResponses = $errorResponses;
+		$this->realm = $realm;
+	}
+
+	/**
+	 * @param non-empty-list<string> $responses
+	 */
+	public function setErrorResponses(array $responses): void
+	{
+		$this->errorResponses = $responses;
 	}
 
 	public function addUser(string $user, string $password): void
@@ -131,13 +135,13 @@ final class HttpAuthenticator
 
 	private function forbidden(IResponse $response): void
 	{
-		$title = $this->title ?? self::DefaultTitle;
 		$response->setCode(IResponse::S401_UNAUTHORIZED);
-		$response->setHeader('WWW-Authenticate', "Basic realm=\"$title\"");
+		$response->setHeader(
+			'WWW-Authenticate',
+			'Basic' . ($this->realm !== null ? " realm=\"$this->realm\"" : ''),
+		);
 
-		$responses = $this->errorResponses ?? self::DefaultErrorResponses;
-
-		echo $responses[array_rand($responses)];
+		echo $this->errorResponses[array_rand($this->errorResponses)];
 
 		if (!$this->testMode) {
 			exit;

@@ -1,5 +1,5 @@
 orisai.http.auth:
-	title: Title
+	realm: realm
 	errorResponses:
 		- a
 		- b

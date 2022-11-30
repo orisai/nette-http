@@ -133,11 +133,12 @@ final class HttpAuthenticatorTest extends TestCase
 
 	public function testCustomMessages(): void
 	{
-		$title = 'title';
 		$errorResponses = ['a', 'b', 'c'];
 
-		$authenticator = new HttpAuthenticator($title, $errorResponses);
+		$authenticator = new HttpAuthenticator();
 		$authenticator->setTestMode();
+		$authenticator->setRealm('realm');
+		$authenticator->setErrorResponses($errorResponses);
 
 		$request = new Request(new UrlScript('https://example.com'));
 		$response = new TestResponse();
@@ -147,12 +148,33 @@ final class HttpAuthenticatorTest extends TestCase
 		self::assertSame(
 			[
 				'WWW-Authenticate' => [
-					'Basic realm="title"',
+					'Basic realm="realm"',
 				],
 			],
 			$response->getHeaders(),
 		);
 		self::assertContains($echoed, $errorResponses);
+	}
+
+	public function testNoRealm(): void
+	{
+		$authenticator = new HttpAuthenticator();
+		$authenticator->setTestMode();
+		$authenticator->setRealm(null);
+
+		$request = new Request(new UrlScript('https://example.com'));
+		$response = new TestResponse();
+
+		Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+
+		self::assertSame(
+			[
+				'WWW-Authenticate' => [
+					'Basic',
+				],
+			],
+			$response->getHeaders(),
+		);
 	}
 
 }

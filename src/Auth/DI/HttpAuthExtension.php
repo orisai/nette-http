@@ -20,7 +20,7 @@ final class HttpAuthExtension extends CompilerExtension
 	{
 		return Expect::structure([
 			'enabled' => Expect::bool(false),
-			'title' => Expect::anyOf(Expect::string(), Expect::null()),
+			'realm' => Expect::anyOf(Expect::string(), Expect::null())->default(false),
 			'errorResponses' => Expect::anyOf(
 				Expect::listOf(Expect::string())->min(1),
 				Expect::null(),
@@ -44,10 +44,15 @@ final class HttpAuthExtension extends CompilerExtension
 		}
 
 		$authenticatorDefinition = $builder->addDefinition($this->prefix('authenticator'))
-			->setFactory(HttpAuthenticator::class, [
-				$config->title,
-				$config->errorResponses,
-			]);
+			->setFactory(HttpAuthenticator::class);
+
+		if ($config->realm !== false) {
+			$authenticatorDefinition->addSetup('setRealm', [$config->realm]);
+		}
+
+		if ($config->errorResponses !== null) {
+			$authenticatorDefinition->addSetup('setErrorResponses', [$config->errorResponses]);
+		}
 
 		foreach ($config->users as $user => $password) {
 			$authenticatorDefinition->addSetup('addUser', [

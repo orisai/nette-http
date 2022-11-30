@@ -19,7 +19,7 @@ composer require orisai/nette-http
 ## HTTP authenticator
 
 [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
-via [Basic Auth](https://datatracker.ietf.org/doc/html/rfc7617)
+via [WWW-Authenticate](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate) basic auth
 
 Ideal for hiding publicly available dev version of the app.
 
@@ -62,11 +62,14 @@ orisai.http.auth:
 			- /api
 ```
 
-[Optional] Change title and possible (random) error responses from default ones (if you don't like Lord Of The Rings)
+[Optional] Change [realm](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#realm) and possible
+(random) error responses from default ones (if you don't like Lord Of The Rings)
 
 ```neon
 orisai.http.auth:
-	title: HTTP authentication
+	# string|null
+	realm: App
+	# list<string>
 	errorResponses:
 		- Not allowed
 ```
