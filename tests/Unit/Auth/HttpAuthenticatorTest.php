@@ -17,6 +17,15 @@ use Tracy\Debugger;
 final class HttpAuthenticatorTest extends TestCase
 {
 
+	private HttpAuthenticator $authenticator;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->authenticator = new HttpAuthenticator();
+		$this->authenticator->setTestMode();
+	}
+
 	/**
 	 * @dataProvider provideAllowed
 	 */
@@ -25,10 +34,9 @@ final class HttpAuthenticatorTest extends TestCase
 		$request = new Request(new UrlScript("https://$user:$password@example.com"));
 		$response = new TestResponse();
 
-		$authenticator = new HttpAuthenticator();
-		$authenticator->addUser($user, $passwordHash);
+		$this->authenticator->addUser($user, $passwordHash);
 
-		$authenticator->authenticate($request, $response);
+		$this->authenticator->authenticate($request, $response);
 		self::assertTrue(true);
 	}
 
@@ -46,11 +54,9 @@ final class HttpAuthenticatorTest extends TestCase
 		$request = new Request(new UrlScript("https://$user:$password@example.com"));
 		$response = new TestResponse();
 
-		$authenticator = new HttpAuthenticator();
-		$authenticator->setTestMode();
-		$authenticator->addUser($userExpected, $passwordHash);
+		$this->authenticator->addUser($userExpected, $passwordHash);
 
-		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+		$echoed = Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
 
 		self::assertSame(
 			[
@@ -83,14 +89,13 @@ final class HttpAuthenticatorTest extends TestCase
 		$request = new Request(new UrlScript("https://example.com$currentPath"));
 		$response = new TestResponse();
 
-		$authenticator = new HttpAuthenticator();
-		$authenticator->addExcludedPath('a');
-		$authenticator->addExcludedPath('b/');
-		$authenticator->addExcludedPath('/c');
-		$authenticator->addExcludedPath('/d/');
-		$authenticator->addExcludedPath('e///foo');
+		$this->authenticator->addExcludedPath('a');
+		$this->authenticator->addExcludedPath('b/');
+		$this->authenticator->addExcludedPath('/c');
+		$this->authenticator->addExcludedPath('/d/');
+		$this->authenticator->addExcludedPath('e///foo');
 
-		$authenticator->authenticate($request, $response);
+		$this->authenticator->authenticate($request, $response);
 		self::assertTrue(true);
 	}
 
@@ -120,13 +125,12 @@ final class HttpAuthenticatorTest extends TestCase
 		$request = new Request(new UrlScript("https://example.com$currentPath"));
 		$response = new TestResponse();
 
-		$authenticator = new HttpAuthenticator();
-		$authenticator->setTestMode();
+		$this->authenticator->setTestMode();
 
-		$authenticator->addExcludedPath('a');
-		$authenticator->addExcludedPath('b/foo');
+		$this->authenticator->addExcludedPath('a');
+		$this->authenticator->addExcludedPath('b/foo');
 
-		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+		$echoed = Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
 
 		self::assertSame(
 			[
@@ -157,20 +161,18 @@ final class HttpAuthenticatorTest extends TestCase
 
 	public function testTracy(): void
 	{
-		$authenticator = new HttpAuthenticator();
-		$authenticator->setTestMode();
-		$authenticator->addUser('user', 'password');
+		$this->authenticator->addUser('user', 'password');
 
 		Debugger::$productionMode = false;
 
 		$request = new Request(new UrlScript('https://user:password@example.com'));
 		$response = new TestResponse();
-		$authenticator->authenticate($request, $response);
+		$this->authenticator->authenticate($request, $response);
 		self::assertFalse(Debugger::$productionMode);
 
 		$request = new Request(new UrlScript('https://example.com'));
 		$response = new TestResponse();
-		Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+		Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
 		self::assertTrue(Debugger::$productionMode);
 	}
 
@@ -178,15 +180,13 @@ final class HttpAuthenticatorTest extends TestCase
 	{
 		$errorResponses = ['a', 'b', 'c'];
 
-		$authenticator = new HttpAuthenticator();
-		$authenticator->setTestMode();
-		$authenticator->setRealm('realm');
-		$authenticator->setErrorResponses($errorResponses);
+		$this->authenticator->setRealm('realm');
+		$this->authenticator->setErrorResponses($errorResponses);
 
 		$request = new Request(new UrlScript('https://example.com'));
 		$response = new TestResponse();
 
-		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+		$echoed = Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
 
 		self::assertSame(
 			[
@@ -201,14 +201,12 @@ final class HttpAuthenticatorTest extends TestCase
 
 	public function testNoRealm(): void
 	{
-		$authenticator = new HttpAuthenticator();
-		$authenticator->setTestMode();
-		$authenticator->setRealm(null);
+		$this->authenticator->setRealm(null);
 
 		$request = new Request(new UrlScript('https://example.com'));
 		$response = new TestResponse();
 
-		Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
+		Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
 
 		self::assertSame(
 			[

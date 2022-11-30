@@ -21,7 +21,8 @@ composer require orisai/nette-http
 [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
 via [WWW-Authenticate](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate) basic auth
 
-Ideal for hiding publicly available dev version of the app.
+- Ideal for hiding publicly available dev version of the app.
+- Runs only in HTTP mode, CLI mode is not affected.
 
 Register and enable extension
 

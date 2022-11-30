@@ -15,6 +15,7 @@ use function password_verify;
 use function preg_match;
 use function preg_split;
 use function str_starts_with;
+use const PHP_SAPI;
 use const PREG_SPLIT_NO_EMPTY;
 
 final class HttpAuthenticator
@@ -74,6 +75,10 @@ final class HttpAuthenticator
 
 	public function authenticate(IRequest $request, IResponse $response): void
 	{
+		if (PHP_SAPI === 'cli' && !$this->testMode) {
+			return;
+		}
+
 		if ($this->isPathExcluded($request)) {
 			return;
 		}
