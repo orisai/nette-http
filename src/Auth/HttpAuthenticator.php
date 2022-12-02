@@ -114,8 +114,10 @@ final class HttpAuthenticator
 
 	private function isUserAllowed(IRequest $request): bool
 	{
-		if (method_exists($request, 'getBasicCredentials')) {
-			[$user, $password] = $request->getBasicCredentials();
+		if (
+			method_exists($request, 'getBasicCredentials')
+			&& ($credentials = $request->getBasicCredentials()) !== null) {
+			[$user, $password] = $credentials;
 		} else {
 			$url = $request->getUrl();
 			$user = $url->getUser();

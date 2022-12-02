@@ -10,6 +10,8 @@ use OriNette\Http\Auth\HttpAuthenticator;
 use OriNette\Http\Tester\TestResponse;
 use PHPUnit\Framework\TestCase;
 use Tracy\Debugger;
+use function base64_encode;
+use function method_exists;
 
 /**
  * @runTestsInSeparateProcesses
@@ -44,6 +46,29 @@ final class HttpAuthenticatorTest extends TestCase
 	{
 		yield ['user', 'password', 'password'];
 		yield ['user', 'password', '$2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a'];
+	}
+
+	public function testBasicCredentials(): void
+	{
+		if (!method_exists(Request::class, 'getBasicCredentials')) {
+			self::markTestSkipped('Needs nette/http >= 3.2.0');
+		}
+
+		$request = new Request(
+			new UrlScript('https://example.com'),
+			null,
+			null,
+			null,
+			[
+				'Authorization' => 'Basic ' . base64_encode('user:password'),
+			],
+		);
+		$response = new TestResponse();
+
+		$this->authenticator->addUser('user', 'password');
+
+		$this->authenticator->authenticate($request, $response);
+		self::assertTrue(true);
 	}
 
 	/**
