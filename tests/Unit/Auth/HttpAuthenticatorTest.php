@@ -31,9 +31,35 @@ final class HttpAuthenticatorTest extends TestCase
 	/**
 	 * @dataProvider provideAllowed
 	 */
-	public function testAllowed(string $user, string $password, string $passwordHash): void
+	public function testAllowedWithUrl(string $user, string $password, string $passwordHash): void
 	{
 		$request = new Request(new UrlScript("https://$user:$password@example.com"));
+		$response = new TestResponse();
+
+		$this->authenticator->addUser($user, $passwordHash);
+
+		$this->authenticator->authenticate($request, $response);
+		self::assertTrue(true);
+	}
+
+	/**
+	 * @dataProvider provideAllowed
+	 */
+	public function testAllowedWithBasicCredentials(string $user, string $password, string $passwordHash): void
+	{
+		if (!method_exists(Request::class, 'getBasicCredentials')) {
+			self::markTestSkipped('Needs nette/http >= 3.2.0');
+		}
+
+		$request = new Request(
+			new UrlScript('https://example.com'),
+			null,
+			null,
+			null,
+			[
+				'Authorization' => 'Basic ' . base64_encode("$user:$password"),
+			],
+		);
 		$response = new TestResponse();
 
 		$this->authenticator->addUser($user, $passwordHash);
@@ -46,9 +72,48 @@ final class HttpAuthenticatorTest extends TestCase
 	{
 		yield ['user', 'password', 'password'];
 		yield ['user', 'password', '$2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a'];
+		yield ['', '', ''];
+		yield ['user', '', ''];
+		yield ['', 'password', 'password'];
 	}
 
-	public function testBasicCredentials(): void
+	/**
+	 * @dataProvider provideNotAllowed
+	 */
+	public function testNotAllowedWithUrl(
+		string $user,
+		string $password,
+		string $userExpected,
+		string $passwordExpected
+	): void
+	{
+		$request = new Request(new UrlScript("https://$user:$password@example.com"));
+		$response = new TestResponse();
+
+		$this->authenticator->addUser($userExpected, $passwordExpected);
+
+		$echoed = Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
+
+		self::assertSame(
+			[
+				'WWW-Authenticate' => [
+					'Basic realm="Speak friend and enter."',
+				],
+			],
+			$response->getHeaders(),
+		);
+		self::assertContains($echoed, HttpAuthenticator::DefaultErrorResponses);
+	}
+
+	/**
+	 * @dataProvider provideNotAllowed
+	 */
+	public function testNotAllowedWithBasicCredentials(
+		string $user,
+		string $password,
+		string $userExpected,
+		string $passwordExpected
+	): void
 	{
 		if (!method_exists(Request::class, 'getBasicCredentials')) {
 			self::markTestSkipped('Needs nette/http >= 3.2.0');
@@ -60,26 +125,12 @@ final class HttpAuthenticatorTest extends TestCase
 			null,
 			null,
 			[
-				'Authorization' => 'Basic ' . base64_encode('user:password'),
+				'Authorization' => 'Basic ' . base64_encode("$user:$password"),
 			],
 		);
 		$response = new TestResponse();
 
-		$this->authenticator->addUser('user', 'password');
-
-		$this->authenticator->authenticate($request, $response);
-		self::assertTrue(true);
-	}
-
-	/**
-	 * @dataProvider provideNotAllowed
-	 */
-	public function testNotAllowed(?string $user, string $userExpected, ?string $password, string $passwordHash): void
-	{
-		$request = new Request(new UrlScript("https://$user:$password@example.com"));
-		$response = new TestResponse();
-
-		$this->authenticator->addUser($userExpected, $passwordHash);
+		$this->authenticator->addUser($userExpected, $passwordExpected);
 
 		$echoed = Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
 
@@ -96,13 +147,20 @@ final class HttpAuthenticatorTest extends TestCase
 
 	public function provideNotAllowed(): Generator
 	{
-		yield [null, 'user', 'password', 'password'];
-		yield ['user', 'user', null, 'password'];
-		yield [null, 'user', null, 'password'];
-		yield ['bad', 'user', 'password', 'password'];
-		yield ['bad', 'user', 'password', '$2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a'];
-		yield ['user', 'user', 'bad', 'password'];
-		yield ['user', 'user', 'bad', '$2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a'];
+		yield ['', 'password', 'user', 'password'];
+		yield ['user', '', 'user', 'password'];
+		yield ['', '', 'user', 'password'];
+
+		yield ['user', 'password', '', 'password'];
+		yield ['user', 'password', 'user', ''];
+		yield ['user', 'password', '', ''];
+		yield ['user', '', '', ''];
+		yield ['', 'password', '', ''];
+
+		yield ['bad', 'password', 'user', 'password'];
+		yield ['bad', 'password', 'user', '$2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a'];
+		yield ['user', 'bad', 'user', 'password'];
+		yield ['user', 'bad', 'user', '$2y$10$kP2nVtmSOLA2LIDnwNxa9.MpL0VnCddBOGltj1zySsLF7AxYQae3a'];
 	}
 
 	/**
