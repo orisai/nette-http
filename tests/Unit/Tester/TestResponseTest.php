@@ -4,9 +4,12 @@ namespace Tests\OriNette\Http\Unit\Tester;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use Generator;
 use OriNette\Http\Tester\TestResponse;
 use PHPUnit\Framework\TestCase;
 use function array_keys;
+use function strtolower;
+use function strtoupper;
 
 final class TestResponseTest extends TestCase
 {
@@ -34,30 +37,83 @@ final class TestResponseTest extends TestCase
 		self::assertSame([], $response->getHeaders());
 
 		$response->setHeader('foo', '1');
-		self::assertSame('foo: 1', $response->getHeader('foo'));
+		self::assertSame('Foo: 1', $response->getHeader('Foo'));
 
 		$response->setHeader('foo', '2');
-		self::assertSame('foo: 2', $response->getHeader('foo'));
+		self::assertSame('Foo: 2', $response->getHeader('Foo'));
 
 		$response->addHeader('foo', '3');
 		$response->addHeader('bar', '1');
-		self::assertSame('foo: 2,3', $response->getHeader('foo'));
+		self::assertSame('Foo: 2,3', $response->getHeader('Foo'));
 
 		self::assertSame(
 			[
-				'foo' => ['2', '3'],
-				'bar' => ['1'],
+				'Foo' => ['2', '3'],
+				'Bar' => ['1'],
 			],
 			$response->getHeaders(),
 		);
 
-		$response->deleteHeader('foo');
+		$response->deleteHeader('Foo');
 		self::assertSame(
 			[
-				'bar' => ['1'],
+				'Bar' => ['1'],
 			],
 			$response->getHeaders(),
 		);
+	}
+
+	/**
+	 * @dataProvider provideHeaderCaseNonSensitivity
+	 */
+	public function testHeaderCaseNonSensitivity(string $header): void
+	{
+		$response = new TestResponse();
+
+		$lower = strtolower($header);
+		$upper = strtoupper($header);
+
+		$response->setHeader($header, '1');
+		self::assertSame("$header: 1", $response->getHeader($header));
+		$response->deleteHeader($header);
+		self::assertNull($response->getHeader($header));
+
+		$response->setHeader($lower, '1');
+		self::assertSame("$header: 1", $response->getHeader($lower));
+		$response->deleteHeader($lower);
+		self::assertNull($response->getHeader($lower));
+
+		$response->setHeader($upper, '1');
+		self::assertSame("$header: 1", $response->getHeader($upper));
+		$response->deleteHeader($upper);
+		self::assertNull($response->getHeader($upper));
+
+		$response->setHeader($header, '1');
+		self::assertSame("$header: 1", $response->getHeader($lower));
+		$response->deleteHeader($lower);
+		self::assertNull($response->getHeader($header));
+
+		$response->setHeader($header, '1');
+		self::assertSame("$header: 1", $response->getHeader($upper));
+		$response->deleteHeader($upper);
+		self::assertNull($response->getHeader($header));
+
+		$response->setHeader($lower, '1');
+		self::assertSame("$header: 1", $response->getHeader($header));
+		$response->deleteHeader($header);
+		self::assertNull($response->getHeader($lower));
+
+		$response->addHeader($header, '1');
+		$response->addHeader($lower, '2');
+		$response->addHeader($upper, '3');
+		self::assertSame("$header: 1,2,3", $response->getHeader($header));
+	}
+
+	public function provideHeaderCaseNonSensitivity(): Generator
+	{
+		yield ['Connection'];
+		yield ['Content-Type'];
+		yield ['WWW-Authenticate'];
 	}
 
 	public function testCookies(): void

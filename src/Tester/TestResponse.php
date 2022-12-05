@@ -6,8 +6,12 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use Nette\Http\Helpers;
 use Nette\Http\IResponse;
+use function array_map;
+use function explode;
 use function implode;
+use function strtolower;
 use function time;
+use function ucfirst;
 
 /**
  * @phpstan-type CookieValue array{
@@ -47,6 +51,7 @@ final class TestResponse implements IResponse
 
 	public function setHeader(string $name, ?string $value): self
 	{
+		$name = self::formatName($name);
 		if ($value === null) {
 			$this->deleteHeader($name);
 		} else {
@@ -58,6 +63,7 @@ final class TestResponse implements IResponse
 
 	public function addHeader(string $name, string $value): self
 	{
+		$name = self::formatName($name);
 		$this->headers[$name][] = $value;
 
 		return $this;
@@ -65,6 +71,7 @@ final class TestResponse implements IResponse
 
 	public function getHeader(string $header): ?string
 	{
+		$header = self::formatName($header);
 		if (!isset($this->headers[$header])) {
 			return null;
 		}
@@ -82,6 +89,7 @@ final class TestResponse implements IResponse
 
 	public function deleteHeader(string $name): self
 	{
+		$name = self::formatName($name);
 		unset($this->headers[$name]);
 
 		return $this;
@@ -167,6 +175,23 @@ final class TestResponse implements IResponse
 	): void
 	{
 		$this->setCookie($name, '', 0, $path, $domain, $secure);
+	}
+
+	private static function formatName(string $name): string
+	{
+		return implode(
+			'-',
+			array_map(
+				static function (string $word): string {
+					if ($word === 'www') {
+						return 'WWW';
+					}
+
+					return ucfirst($word);
+				},
+				explode('-', strtolower($name)),
+			),
+		);
 	}
 
 }
