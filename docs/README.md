@@ -53,8 +53,11 @@ Integration with debugger
   debug info
 - If you use any other debugger, please raise an issue
 
-[Optional] Exclude paths from http authentication (ideal for APIs which don't expect human interaction and would need
-API client to be modified for basic auth support)
+[Optional] Exclude paths from http authentication
+
+- ideal for APIs which don't expect human interaction and would need API client to be modified for basic auth support
+- if your app runs in path (base url is e.g. https://example.com/script) then don't include the `/script` part in
+  excluded path, it is handled automatically
 
 ```neon
 orisai.http.auth:

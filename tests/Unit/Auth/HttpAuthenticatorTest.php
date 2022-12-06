@@ -28,12 +28,17 @@ final class HttpAuthenticatorTest extends TestCase
 		$this->authenticator->setTestMode();
 	}
 
+	private function createUrl(string $url, ?string $scriptPath = null): UrlScript
+	{
+		return new UrlScript($url, $scriptPath ?? '/index.php');
+	}
+
 	/**
 	 * @dataProvider provideAllowed
 	 */
 	public function testAllowedWithUrl(string $user, string $password, string $passwordHash): void
 	{
-		$request = new Request(new UrlScript("https://$user:$password@example.com"));
+		$request = new Request($this->createUrl("https://$user:$password@example.com"));
 		$response = new TestResponse();
 
 		$this->authenticator->addUser($user, $passwordHash);
@@ -52,7 +57,7 @@ final class HttpAuthenticatorTest extends TestCase
 		}
 
 		$request = new Request(
-			new UrlScript('https://example.com'),
+			new UrlScript($this->createUrl('https://example.com')),
 			null,
 			null,
 			null,
@@ -87,7 +92,7 @@ final class HttpAuthenticatorTest extends TestCase
 		string $passwordExpected
 	): void
 	{
-		$request = new Request(new UrlScript("https://$user:$password@example.com"));
+		$request = new Request($this->createUrl("https://$user:$password@example.com"));
 		$response = new TestResponse();
 
 		$this->authenticator->addUser($userExpected, $passwordExpected);
@@ -120,7 +125,7 @@ final class HttpAuthenticatorTest extends TestCase
 		}
 
 		$request = new Request(
-			new UrlScript('https://example.com'),
+			$this->createUrl('https://example.com'),
 			null,
 			null,
 			null,
@@ -168,8 +173,25 @@ final class HttpAuthenticatorTest extends TestCase
 	 */
 	public function testExcludedPaths(string $currentPath): void
 	{
-		//TODO - test base path - currently disabled in HttpAuthenticator - seems like Nette does not like / on the end
-		$request = new Request(new UrlScript("https://example.com$currentPath"));
+		$request = new Request($this->createUrl("https://example.com$currentPath"));
+		$response = new TestResponse();
+
+		$this->authenticator->addExcludedPath('a');
+		$this->authenticator->addExcludedPath('b/');
+		$this->authenticator->addExcludedPath('/c');
+		$this->authenticator->addExcludedPath('/d/');
+		$this->authenticator->addExcludedPath('e///foo');
+
+		$this->authenticator->authenticate($request, $response);
+		self::assertTrue(true);
+	}
+
+	/**
+	 * @dataProvider provideExcludedPaths
+	 */
+	public function testExcludedPathsWithScriptPath(string $currentPath): void
+	{
+		$request = new Request($this->createUrl("https://example.com/script/$currentPath", '/script/index.php'));
 		$response = new TestResponse();
 
 		$this->authenticator->addExcludedPath('a');
@@ -205,7 +227,7 @@ final class HttpAuthenticatorTest extends TestCase
 	 */
 	public function testNotAllowedPaths(string $currentPath): void
 	{
-		$request = new Request(new UrlScript("https://example.com$currentPath"));
+		$request = new Request($this->createUrl("https://example.com$currentPath"));
 		$response = new TestResponse();
 
 		$this->authenticator->setTestMode();
@@ -248,7 +270,7 @@ final class HttpAuthenticatorTest extends TestCase
 
 		Debugger::$productionMode = false;
 
-		$request = new Request(new UrlScript('https://user:password@example.com'));
+		$request = new Request($this->createUrl('https://user:password@example.com'));
 		$response = new TestResponse();
 		$this->authenticator->authenticate($request, $response);
 		self::assertFalse(Debugger::$productionMode);
@@ -266,7 +288,7 @@ final class HttpAuthenticatorTest extends TestCase
 		$this->authenticator->setRealm('realm');
 		$this->authenticator->setErrorResponses($errorResponses);
 
-		$request = new Request(new UrlScript('https://example.com'));
+		$request = new Request($this->createUrl('https://example.com'));
 		$response = new TestResponse();
 
 		$echoed = Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));
@@ -286,7 +308,7 @@ final class HttpAuthenticatorTest extends TestCase
 	{
 		$this->authenticator->setRealm(null);
 
-		$request = new Request(new UrlScript('https://example.com'));
+		$request = new Request($this->createUrl('https://example.com'));
 		$response = new TestResponse();
 
 		Helpers::capture(fn () => $this->authenticator->authenticate($request, $response));

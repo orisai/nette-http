@@ -97,10 +97,7 @@ final class HttpAuthenticator
 	private function isPathExcluded(IRequest $request): bool
 	{
 		$url = $request->getUrl();
-		$relativePath = $this->normalizePath(
-			//substr($url->getPath(), strlen($url->getBasePath())),
-			$url->getPath(),
-		);
+		$relativePath = $this->normalizePath($url->getRelativePath());
 
 		foreach ($this->excludedPaths as $excludedPath) {
 			$excludedPath = $this->normalizePath($excludedPath);

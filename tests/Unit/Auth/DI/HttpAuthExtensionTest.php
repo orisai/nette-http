@@ -25,6 +25,8 @@ final class HttpAuthExtensionTest extends TestCase
 	{
 		parent::setUp();
 
+		$_SERVER['SCRIPT_NAME'] = '/index.php';
+
 		$this->rootDir = dirname(__DIR__, 4);
 		if (PHP_VERSION_ID < 8_01_00) {
 			@mkdir("$this->rootDir/var/build");
@@ -111,6 +113,23 @@ final class HttpAuthExtensionTest extends TestCase
 		$configurator->addConfig(__DIR__ . '/HttpAuthExtension.excludePath.neon');
 
 		$_SERVER['REQUEST_URI'] = 'https://example.com/api';
+
+		$container = $configurator->createContainer();
+
+		$authenticator = $container->getByType(HttpAuthenticator::class);
+		self::assertInstanceOf(HttpAuthenticator::class, $authenticator);
+	}
+
+	public function testExcludedPathWithScriptPath(): void
+	{
+		$configurator = new ManualConfigurator($this->rootDir);
+		$configurator->setForceReloadContainer();
+
+		$configurator->addConfig(__DIR__ . '/HttpAuthExtension.enabled.neon');
+		$configurator->addConfig(__DIR__ . '/HttpAuthExtension.excludePath.neon');
+
+		$_SERVER['SCRIPT_NAME'] = '/script/index.php';
+		$_SERVER['REQUEST_URI'] = 'https://example.com/script/api';
 
 		$container = $configurator->createContainer();
 
