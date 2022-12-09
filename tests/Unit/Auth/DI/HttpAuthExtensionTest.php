@@ -62,16 +62,11 @@ final class HttpAuthExtensionTest extends TestCase
 		$response = $container->getByType(IResponse::class);
 
 		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
-
-		self::assertSame(
-			[
-				'WWW-Authenticate' => [
-					'Basic realm="Speak friend and enter."',
-				],
-			],
-			$response->getHeaders(),
-		);
 		self::assertContains($echoed, HttpAuthenticator::DefaultErrorResponses);
+
+		$headers = $response->getHeaders();
+		self::assertArrayHasKey('WWW-Authenticate', $headers);
+		self::assertSame(['Basic realm="Speak friend and enter."'], $headers['WWW-Authenticate']);
 	}
 
 	public function testCustomTexts(): void
@@ -92,16 +87,11 @@ final class HttpAuthExtensionTest extends TestCase
 		$response = $container->getByType(IResponse::class);
 
 		$echoed = Helpers::capture(static fn () => $authenticator->authenticate($request, $response));
-
-		self::assertSame(
-			[
-				'WWW-Authenticate' => [
-					'Basic realm="realm"',
-				],
-			],
-			$response->getHeaders(),
-		);
 		self::assertContains($echoed, ['a', 'b', 'c']);
+
+		$headers = $response->getHeaders();
+		self::assertArrayHasKey('WWW-Authenticate', $headers);
+		self::assertSame(['Basic realm="realm"'], $headers['WWW-Authenticate']);
 	}
 
 	public function testExcludedPath(): void
@@ -181,7 +171,6 @@ final class HttpAuthExtensionTest extends TestCase
 		}
 
 		$echoed = Helpers::capture(static fn () => $configurator->createContainer());
-
 		self::assertContains($echoed, HttpAuthenticator::DefaultErrorResponses);
 	}
 
