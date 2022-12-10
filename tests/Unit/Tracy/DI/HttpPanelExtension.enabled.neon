@@ -1,0 +1,7 @@
+extensions:
+	nette.http: Nette\Bridges\HttpDI\HttpExtension
+	orisai.http.panel: OriNette\Http\Tracy\DI\HttpPanelExtension
+	tracy: Tracy\Bridges\Nette\TracyExtension
+
+orisai.http.panel:
+	enabled: true

@@ -7,6 +7,7 @@ Extras for [nette/http](https://github.com/nette/http)
 - [Setup](#setup)
 - [HTTP authenticator](#http-authenticator)
 - [Test response](#test-response)
+- [Tracy panel](#tracy-panel)
 
 ## Setup
 
@@ -90,4 +91,16 @@ be used for a runtime code.
 use OriNette\Http\Tester\TestResponse;
 
 $response = new TestResponse();
+```
+
+## Tracy panel
+
+[Tracy](https://github.com/nette/tracy/) panel shows current request and response
+
+```neon
+extensions:
+	orisai.http.panel: OriNette\Http\Tracy\DI\HttpPanelExtension
+
+orisai.http.panel:
+	enabled: %debugMode%
 ```

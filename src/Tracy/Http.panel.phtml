@@ -1,0 +1,22 @@
+<?php declare(strict_types = 1);
+
+use Nette\Http\IRequest;
+use Nette\Http\IResponse;
+use Tracy\Dumper;
+
+/** @var IRequest $request */
+/** @var IResponse $response */
+
+?>
+<h1>Http</h1>
+
+<div class="tracy-inner">
+	<div class='tracy-inner-container'>
+		<h2>Request</h2>
+		<?= Dumper::toHtml($request) ?>
+	</div>
+	<div class='tracy-inner-container'>
+		<h2>Response</h2>
+		<?= Dumper::toHtml($response) ?>
+	</div>
+</div>
