@@ -1,0 +1,26 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\) with 'OriNette\\\\\\\\Http\\\\\\\\Auth\\\\\\\\HttpAuthenticator' and OriNette\\\\Http\\\\Auth\\\\HttpAuthenticator will always evaluate to true\\.$#"
+			count: 3
+			path: ../tests/Unit/Auth/DI/HttpAuthExtensionTest.php
+
+		-
+			message: "#^Call to function method_exists\\(\\) with 'Nette\\\\\\\\Http\\\\\\\\Request' and 'getBasicCredentials' will always evaluate to true\\.$#"
+			count: 2
+			path: ../tests/Unit/Auth/HttpAuthenticatorTest.php
+
+		-
+			message: "#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertTrue\\(\\) with true will always evaluate to true\\.$#"
+			count: 4
+			path: ../tests/Unit/Auth/HttpAuthenticatorTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringStartsWith\\(\\) expects string, string\\|null given\\.$#"
+			count: 1
+			path: ../tests/Unit/Tester/TestResponseTest.php
+
+		-
+			message: "#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\) with 'OriNette\\\\\\\\Http\\\\\\\\Tracy\\\\\\\\HttpPanel' and null will always evaluate to false\\.$#"
+			count: 1
+			path: ../tests/Unit/Tracy/DI/HttpPanelExtensionTest.php

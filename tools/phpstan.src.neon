@@ -1,9 +1,0 @@
-includes:
-	- phpstan.base.neon
-
-parameters:
-	level: 8
-	resultCachePath: %currentWorkingDirectory%/var/tools/PHPStan/resultCache.src.php
-
-	ignoreErrors:
-		- '#^Fetching deprecated class constant (S302_FOUND|S401_UNAUTHORIZED)(.+)#'
