@@ -143,7 +143,8 @@ final class TestResponse implements IResponse
 		?string $path = null,
 		?string $domain = null,
 		?bool $secure = null,
-		?bool $httpOnly = null
+		?bool $httpOnly = null,
+		?string $sameSite = null
 	): self
 	{
 		$this->cookies[$name] = [

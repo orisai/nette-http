@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/orisai/nette-http/compare/1.1.0...HEAD)
 
+### Fixed
+
+- `TestResponse`
+	- `setCookie()` has parameter `sameSite` to match default `Response` implementation
+
 ## [1.1.0](https://github.com/orisai/nette-http/compare/1.0.1...1.1.0) - 2022-12-10
 
 ### Added
