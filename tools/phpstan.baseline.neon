@@ -16,6 +16,11 @@ parameters:
 			path: ../tests/Unit/Auth/HttpAuthenticatorTest.php
 
 		-
+			message: "#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertSame\\(\\) with array\\{'Cache\\-Control', 'Expires'\\} and \\*NEVER\\* will always evaluate to false\\.$#"
+			count: 1
+			path: ../tests/Unit/Tester/TestResponseTest.php
+
+		-
 			message: "#^Parameter \\#2 \\$string of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringStartsWith\\(\\) expects string, string\\|null given\\.$#"
 			count: 1
 			path: ../tests/Unit/Tester/TestResponseTest.php
