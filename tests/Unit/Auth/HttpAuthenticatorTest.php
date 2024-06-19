@@ -57,10 +57,10 @@ final class HttpAuthenticatorTest extends TestCase
 		}
 
 		$request = new Request(
-			new UrlScript($this->createUrl('https://example.com')),
-			null,
-			null,
-			null,
+			$this->createUrl('https://example.com'),
+			[],
+			[],
+			[],
 			[
 				'Authorization' => 'Basic ' . base64_encode("$user:$password"),
 			],
@@ -126,9 +126,9 @@ final class HttpAuthenticatorTest extends TestCase
 
 		$request = new Request(
 			$this->createUrl('https://example.com'),
-			null,
-			null,
-			null,
+			[],
+			[],
+			[],
 			[
 				'Authorization' => 'Basic ' . base64_encode("$user:$password"),
 			],
