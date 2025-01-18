@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE neon PUBLIC "-//NEON//Neon plugin XML V0.0.1//EN" "../.idea/intellij-neon-pro/xmlSources/Neon.xsd">
+<neon vendor="orisai/nette-http" version="1">
+	<extensions>
+		<extension type="OriNette\Http\Auth\DI\HttpAuthExtension">
+			<schema>
+				<structure>
+					<field name="enabled" default="false">
+						<bool/>
+					</field>
+					<field name="realm" default="false">
+						<string/>
+						<null/>
+					</field>
+					<field name="errorResponses" default="null">
+						<listOf minItems="1">
+							<value>
+								<string/>
+							</value>
+						</listOf>
+						<null/>
+					</field>
+					<field name="users" default="[]">
+						<arrayOf>
+							<key>
+								<string/>
+							</key>
+							<value>
+								<string/>
+							</value>
+						</arrayOf>
+					</field>
+					<field name="exclude">
+						<structure>
+							<field name="paths" default="[]">
+								<listOf>
+									<value>
+										<string/>
+									</value>
+								</listOf>
+							</field>
+						</structure>
+					</field>
+				</structure>
+			</schema>
+			<services>
+				<service name="authenticator" type="OriNette\Http\Auth\HttpAuthenticator"/>
+			</services>
+		</extension>
+		<extension type="OriNette\Http\Tracy\DI\HttpPanelExtension">
+			<schema>
+				<structure>
+					<field name="enabled" default="false">
+						<bool/>
+					</field>
+				</structure>
+			</schema>
+		</extension>
+	</extensions>
+</neon>
