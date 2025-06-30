@@ -23,4 +23,9 @@ parameters:
 			- Orisai\Exceptions\Check\CheckedException
 
 	ignoreErrors:
+		# Internal classes in tests
+		-
+			message: '#(.+)internal(.+)OriNette(.+)#'
+			path: ../tests
+
 		- '#^Fetching deprecated class constant (S302_FOUND|S401_UNAUTHORIZED)(.+)#'
